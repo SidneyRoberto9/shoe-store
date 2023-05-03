@@ -4,7 +4,13 @@ import Carousel from 'react-multi-carousel';
 
 import { ProductCard } from '@/components/ProductCard';
 
-export function RelatedProducts() {
+import { ProductPopulateResponse } from '../@types/ProductPopulate';
+
+interface RelatedProductsProps {
+  products: ProductPopulateResponse[];
+}
+
+export function RelatedProducts({ products }: RelatedProductsProps) {
   const responsive = {
     desktop: {
       breakpoint: { max: 3000, min: 1024 },
@@ -24,16 +30,9 @@ export function RelatedProducts() {
     <div className="mt-[50px] md:mt-[100px] mb-[100px] md:mb-0">
       <div className="text-2xl font-bold mb-5">You Might Also Like</div>
       <Carousel responsive={responsive} containerClass="-mx-[10px]" itemClass="px-[10px]">
-        <ProductCard />
-        <ProductCard />
-        <ProductCard />
-        <ProductCard />
-        <ProductCard />
-        <ProductCard />
-        <ProductCard />
-        <ProductCard />
-        <ProductCard />
-        <ProductCard />
+        {products.map((product) => (
+          <ProductCard key={product.id} attributes={product.attributes} />
+        ))}
       </Carousel>
     </div>
   );
