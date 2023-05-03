@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 
-import { Category, CategoryList } from '../@types/Category';
-import { fetchDataFromApi } from '../server/api';
+import { Category, CategoryList } from '@/@types/Category';
+import { fetchDataFromApi } from '@/server/api';
 
 interface CategoryProps {
   categories: CategoryList[];
