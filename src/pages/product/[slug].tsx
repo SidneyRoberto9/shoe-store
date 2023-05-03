@@ -1,31 +1,76 @@
-import { NextRouter, useRouter } from 'next/router';
-import { IoMdHeartEmpty } from 'react-icons/io';
+import 'react-toastify/dist/ReactToastify.css';
 
+import { GetStaticPaths, GetStaticProps } from 'next';
+import { useState } from 'react';
+import { IoMdHeartEmpty } from 'react-icons/io';
+import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
+import { toast, ToastContainer } from 'react-toastify';
+
+import { Response } from '@/@types/api';
+import { ProductPopulateResponse } from '@/@types/ProductPopulate';
 import { ProductDetailsCarousel } from '@/components/ProductDetailsCarousel';
 import { RelatedProducts } from '@/components/RelatedProducts';
 import { Wrapper } from '@/components/Wrapper';
+import { fetchDataFromApi } from '@/server/api';
+import { addToCart } from '@/store/cartSlice';
+import { useAppDispatch } from '@/store/hooks';
+import { formatPrice, getDiscountedPricePercentage } from '@/utils/helper';
 
-export default function ProductDetails() {
-  const router: NextRouter = useRouter();
+interface ProductDetailsProps {
+  product: Response<ProductPopulateResponse>;
+  products: Response<ProductPopulateResponse>;
+}
 
-  const { slug } = router.query;
+export default function ProductDetails({ product, products }: ProductDetailsProps) {
+  const dispatch = useAppDispatch();
 
-  const sizes: string[] = ['UK 6', 'UK 6.5', 'UK 7', 'UK 7.5', 'UK 8', 'UK 8.5', 'UK 9', 'UK 9.5'];
+  const [selectSize, setSelectSize] = useState<string>('');
+  const [showError, setShowError] = useState<boolean>(false);
+
+  const productData = product.data[0].attributes;
+  const productImageData = productData.image.data;
+  const productSizeData = productData.size.data;
+
+  function notify() {
+    toast.success('Success. Check your cart!', {
+      position: 'bottom-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+      theme: 'dark',
+    });
+  }
 
   return (
     <div className="w-full md:py-20">
       <Wrapper>
         <div className="flex flex-col lg:flex-row md:px-10 gap-[50px] lg:gap-[100px]">
           <div className="w-full md:w-auto flex-[1.5] max-w-[500px] lg:max-w-full mx-auto lg:mx-0">
-            <ProductDetailsCarousel />
+            <ProductDetailsCarousel images={productImageData} />
           </div>
 
           <div className="flex-[1] py-3">
-            <div className="text-[34px] font-semibold mb-2">Jordan Retro 6 G</div>
-
-            <div className="text-lg font-semibold mb-5">Men&apos;s Golf Shoes</div>
-
-            <div className="text-lg font-semibold">MRP: $ 19 695.00</div>
+            <div className="text-[34px] font-semibold mb-2">{productData.name}</div>
+            <div className="text-lg font-semibold mb-5">{productData.subtitle}</div>
+            <div className="flex items-center">
+              <p className="mr-2 text-lg font-semibold">{formatPrice(productData.price)}</p>
+              {productData.original_price && (
+                <>
+                  <p className="text-base font-medium line-through">
+                    {formatPrice(productData.original_price)}
+                  </p>
+                  <p className="ml-auto text-base font-medium text-green-500">
+                    {`${getDiscountedPricePercentage(
+                      productData.original_price,
+                      productData.price,
+                    )}% off`}
+                  </p>
+                </>
+              )}
+            </div>
             <div className="text-md font-medium text-black/[0.5]">incl. of taxes</div>
             <div className="text-md font-medium text-black/[0.5] mb-20">{`(Also includes all appplicable duties)`}</div>
 
@@ -37,30 +82,49 @@ export default function ProductDetails() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
-                {sizes.map((size: string, index: number) => (
+              <div id="sizesGrid" className="grid grid-cols-3 gap-2">
+                {productSizeData.map((item, index: number) => (
                   <div
                     key={index}
-                    className="border rounded-md text-center py-3 font-medium hover:border-black cursor-pointer"
+                    className={`border rounded-md text-center py-3 font-medium ${
+                      item.enabled
+                        ? 'hover:border-black cursor-pointer'
+                        : 'cursor-not-allowed bg-black/[0.1] opacity-50'
+                    } ${selectSize === item.size && 'border-black'}`}
+                    onClick={() => {
+                      setSelectSize(item.size);
+                      setShowError(false);
+                    }}
                   >
-                    {size}
+                    {item.size}
                   </div>
                 ))}
-                <div className="border rounded-md text-center py-3 font-medium cursor-not-allowed bg-black/[0.1] opacity-50">
-                  UK 10
-                </div>
-                <div className="border rounded-md text-center py-3 font-medium cursor-not-allowed bg-black/[0.1] opacity-50">
-                  UK 10.5
-                </div>
-                <div className="border rounded-md text-center py-3 font-medium cursor-not-allowed bg-black/[0.1] opacity-50">
-                  UK 11
-                </div>
               </div>
 
-              <div className="text-red-600 mt-1">Size selection is required</div>
+              {showError && <div className="text-red-600 mt-1">Size selection is required</div>}
             </div>
 
-            <button className="w-full py-4 rounded-full bg-black text-white text-lg font-medium transition-transform active:scale-95 mb-3 hover:opacity-75">
+            <button
+              className="w-full py-4 rounded-full bg-black text-white text-lg font-medium transition-transform active:scale-95 mb-3 hover:opacity-75"
+              onClick={() => {
+                if (!selectSize) {
+                  setShowError(true);
+                  document.getElementById('sizesGrid')?.scrollIntoView({
+                    block: 'end',
+                    behavior: 'smooth',
+                  });
+                } else {
+                  dispatch(
+                    addToCart({
+                      ...product.data[0],
+                      selectSize,
+                      oneQuantityPrice: productData.price,
+                    }),
+                  );
+                  notify();
+                }
+              }}
+            >
               Add to Cart
             </button>
 
@@ -71,26 +135,40 @@ export default function ProductDetails() {
 
             <div>
               <div className="text-lg font-bold mb-5">Product Details</div>
-              <div className="text-md mb-5">
-                Feel unbeatable from the tee box to the final putt in a design ithat's pure early
-                MJ: speed, class and laden with true early '90s touches like visible Air and a
-                translucent rubber sole that continue to stand the test of time. This model fuses
-                the strut of 1st MJ's championship with some of our best golf technology, helping
-                you make a statement of confidence when it comes time to tame the course.
-              </div>
-              <div className="text-md mb-5">
-                Feel unbeatable from the tee box to the final putt in a design ithat's pure early
-                MJ: speed, class and laden with true early '90s touches like visible Air and a
-                translucent rubber sole that continue to stand the test of time. This model fuses
-                the strut of 1st MJ's championship with some of our best golf technology, helping
-                you make a statement of confidence when it comes time to tame the course.
+              <div className="markdown text-md mb-5">
+                <ReactMarkdown>{productData.description}</ReactMarkdown>
               </div>
             </div>
           </div>
         </div>
 
-        <RelatedProducts />
+        <RelatedProducts products={products.data} />
+        <ToastContainer />
       </Wrapper>
     </div>
   );
 }
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const { data } = await fetchDataFromApi('products?populate=*');
+
+  const paths = data.map((product: ProductPopulateResponse) => ({
+    params: { slug: product.attributes.slug },
+  }));
+
+  return { paths, fallback: false };
+};
+
+export const getStaticProps: GetStaticProps = async (context) => {
+  const { slug } = context.params!;
+
+  const product = await fetchDataFromApi(`products?populate=*&filters[slug][$eq]=${slug}`);
+  const products = await fetchDataFromApi(`products?populate=*&[filters][slug][$ne]=${slug}`);
+
+  return {
+    props: {
+      product,
+      products,
+    },
+  };
+};
