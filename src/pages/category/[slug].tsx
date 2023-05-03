@@ -1,26 +1,28 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
-import { NextRouter, useRouter } from 'next/router';
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
 
 import { Response } from '@/@types/api';
-import { CategoryPopulateResponse } from '@/@types/CategoryPopulate';
-import { ProductCard } from '@/components/ProductCard';
+import { Category } from '@/@types/Category';
+import { ProductCard } from '@/components/Product/ProductCard';
 import { Wrapper } from '@/components/Wrapper';
 import { fetchDataFromApi } from '@/server/api';
 
 interface CategoryProps {
-  categories: any;
+  category: any;
   products: any;
   slug: string;
 }
 
 const maxResult: number = 3;
 
-export default function Category({ products, categories, slug }: CategoryProps) {
+export default function Category({ products, category, slug }: CategoryProps) {
   const [pageIndex, setPageIndex] = useState<number>(1);
 
-  const { data, error, isLoading } = useSWR<Response>(
+  const categoryData = category.data[0];
+
+  const { data, isLoading } = useSWR<Response>(
     `products?populate=*&[filters][categories][slug][$eq]=${slug}&pagination[page]=${pageIndex}&pagination[pageSize]=${maxResult}`,
     fetchDataFromApi,
     {
@@ -39,7 +41,7 @@ export default function Category({ products, categories, slug }: CategoryProps) 
       <Wrapper>
         <div className="text-center max-w-[800px] mx-auto mt-8 md:mt-0">
           <div className="text-[28px] md:test-[34px] mb-5 font-semibold leading-tight">
-            {categories.data[0].attributes.name}
+            {categoryData.attributes.name}
           </div>
         </div>
 
@@ -88,7 +90,7 @@ export default function Category({ products, categories, slug }: CategoryProps) 
 export const getStaticPaths: GetStaticPaths = async () => {
   const { data } = await fetchDataFromApi('categories?populate=*');
 
-  const paths = data.map((category: CategoryPopulateResponse) => ({
+  const paths = data.map((category: Category) => ({
     params: { slug: category.attributes.slug },
   }));
 
@@ -98,14 +100,14 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async (context) => {
   const { slug } = context.params!;
 
-  const categories = await fetchDataFromApi(`categories?filters[slug][$eq]=${slug}`);
+  const category = await fetchDataFromApi(`categories?filters[slug][$eq]=${slug}`);
   const products = await fetchDataFromApi(
     `products?populate=*&[filters][categories][slug][$eq]=${slug}&pagination[page]=1&pagination[pageSize]=3`,
   );
 
   return {
     props: {
-      categories,
+      category,
       products,
       slug,
     },

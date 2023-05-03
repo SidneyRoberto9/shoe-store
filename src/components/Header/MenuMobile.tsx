@@ -1,14 +1,14 @@
 import Link from 'next/link';
 import { BsChevronDown } from 'react-icons/bs';
 
-import { CategoryPopulateResponse } from '@/@types/CategoryPopulate';
-import { routesMenu } from '@/data/MenuRoutes';
+import { CategoryList } from '@/@types/Category';
+import { routesMenu } from '@/utils/MenuRoutes';
 
 interface MenuProps {
   categoryMenu: boolean;
   setCategoryMenu: (value: boolean) => void;
   setMobile: (value: boolean) => void;
-  categories: CategoryPopulateResponse[];
+  categories: CategoryList[];
 }
 
 export function MenuMobile({ categoryMenu, setCategoryMenu, setMobile, categories }: MenuProps) {
@@ -28,7 +28,7 @@ export function MenuMobile({ categoryMenu, setCategoryMenu, setMobile, categorie
 
               {categoryMenu && (
                 <ul className="bg-black/[0.05] -mx-5 mt-4 -mb-4">
-                  {categories.map(({ id, attributes: { slug, name, products } }) => (
+                  {categories.map(({ id, slug, name, size }) => (
                     <Link
                       key={id}
                       href={`/category/${slug}`}
@@ -39,7 +39,7 @@ export function MenuMobile({ categoryMenu, setCategoryMenu, setMobile, categorie
                     >
                       <li className="py-4 px-8 border-t flex justify-between">
                         {name}
-                        <span className="opacity-50 text-sm">{`(${products.data.length})`}</span>
+                        <span className="opacity-50 text-sm">{`(${size})`}</span>
                       </li>
                     </Link>
                   ))}

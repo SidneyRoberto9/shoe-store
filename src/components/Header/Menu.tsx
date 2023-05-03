@@ -1,13 +1,13 @@
 import Link from 'next/link';
 import { BsChevronDown } from 'react-icons/bs';
 
-import { CategoryPopulateResponse } from '@/@types/CategoryPopulate';
-import { routesMenu } from '@/data/MenuRoutes';
+import { CategoryList } from '@/@types/Category';
+import { routesMenu } from '@/utils/MenuRoutes';
 
 interface MenuProps {
   categoryMenu: boolean;
   setCategoryMenu: (value: boolean) => void;
-  categories: CategoryPopulateResponse[];
+  categories: CategoryList[];
 }
 
 export function Menu({ categoryMenu, setCategoryMenu, categories }: MenuProps) {
@@ -26,7 +26,7 @@ export function Menu({ categoryMenu, setCategoryMenu, categories }: MenuProps) {
 
               {categoryMenu && (
                 <ul className="bg-white absolute top-6 left-0 min-w-[250px] px-1 text-black shadow-lg">
-                  {categories.map(({ id, attributes: { slug, name, products } }) => (
+                  {categories.map(({ id, slug, name, size }) => (
                     <Link
                       key={id}
                       href={`/category/${slug}`}
@@ -34,7 +34,7 @@ export function Menu({ categoryMenu, setCategoryMenu, categories }: MenuProps) {
                     >
                       <li className="h-12 flex justify-between items-center px-3 hover:bg-black/[0.03] rounded-md">
                         {name}
-                        <span className="opacity-50 text-sm">{`(${products.data.length})`}</span>
+                        <span className="opacity-50 text-sm">{`(${size})`}</span>
                       </li>
                     </Link>
                   ))}

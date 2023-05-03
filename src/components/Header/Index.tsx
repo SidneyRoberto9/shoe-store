@@ -3,13 +3,12 @@ import { useEffect, useState } from 'react';
 import { BiMenuAltRight } from 'react-icons/bi';
 import { VscChromeClose } from 'react-icons/vsc';
 
-import { CategoryPopulateResponse } from '@/@types/CategoryPopulate';
 import { Cart } from '@/components/Header/Icons/Cart';
 import { Like } from '@/components/Header/Icons/Like';
 import { Menu } from '@/components/Header/Menu';
 import { MenuMobile } from '@/components/Header/MenuMobile';
 import { Wrapper } from '@/components/Wrapper';
-import { fetchDataFromApi } from '@/server/api';
+import { useCategory } from '@/context/useCategory';
 import { useAppSelector } from '@/store/hooks';
 
 export function Header() {
@@ -17,8 +16,8 @@ export function Header() {
   const [showCategoryMenu, setShowCategoryMenu] = useState<boolean>(false);
   const [show, setShow] = useState<string>('translate-y-0');
   const [lastScrollY, setLastScrollY] = useState<number>(0);
-  const [categories, setCategories] = useState<CategoryPopulateResponse[]>([]);
 
+  const { categories } = useCategory();
   const { cartItems } = useAppSelector((state) => state.cart);
 
   function controlNavbar() {
@@ -43,16 +42,6 @@ export function Header() {
       window.removeEventListener('scroll', controlNavbar);
     };
   }, [lastScrollY]);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const { data } = await fetchDataFromApi('categories?populate=*');
-
-      setCategories(data);
-    };
-
-    fetchCategories();
-  }, []);
 
   return (
     <header

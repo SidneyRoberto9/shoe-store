@@ -4,17 +4,18 @@ import { useMemo, useState } from 'react';
 
 import { CartItem } from '@/components/CartItem';
 import { Wrapper } from '@/components/Wrapper';
+import { makePaymentRequest } from '@/server/api';
+import { stripePromise } from '@/server/stripe';
 import { useAppSelector } from '@/store/hooks';
-
 import { formatPrice } from '@/utils/helper';
 
-import { loadStripe } from '@stripe/stripe-js';
-import { makePaymentRequest } from '@/server/api';
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string);
+import { EmptyCart } from '../components/EmptyCart';
 
 export default function cart() {
   const [loading, setLoading] = useState<boolean>(false);
   const { cartItems } = useAppSelector((state) => state.cart);
+
+  const isCartEmpty = useMemo(() => cartItems.length < 1, [cartItems]);
 
   const subTotal = useMemo(() => {
     return cartItems.reduce((total, val) => total + val.attributes.price, 0);
@@ -27,10 +28,12 @@ export default function cart() {
       const res = await makePaymentRequest('orders', {
         products: cartItems,
       });
-      stripe &&
-        (await stripe.redirectToCheckout({
+
+      if (stripe) {
+        await stripe.redirectToCheckout({
           sessionId: res.stripeSession.id,
-        }));
+        });
+      }
     } catch (error) {
       setLoading(false);
       console.log(error);
@@ -40,7 +43,8 @@ export default function cart() {
   return (
     <div className="w-full md:py-20">
       <Wrapper>
-        {cartItems.length > 0 ? (
+        {isCartEmpty && <EmptyCart />}
+        {!isCartEmpty && (
           <>
             <div className="text-center max-w-[800px] mx-auto mt-8 md:mt-0">
               <div className="text-[28px] md:text-[34px] mb-5 font-semibold leading-tight">
@@ -85,28 +89,6 @@ export default function cart() {
               </div>
             </div>
           </>
-        ) : (
-          <div className="flex-[2] flex flex-col items-center pb-[50px] md:-mt-14">
-            <Image
-              src="/assets/empty-cart.jpg"
-              alt=""
-              width={300}
-              height={300}
-              className="w-[300px] md:w-[400px]"
-            />
-            <span className="text-xl font-bold">Your cart is empty</span>
-            <span className="text-center mt-4">
-              Looks like you have not added anything in your cart.
-              <br />
-              Go ahead and explore top categories.
-            </span>
-            <Link
-              href={'/'}
-              className="py-4 px-8 rounded-full bg-black text-white text-lg font-medium transition-transform active:scale-95 mb-3 hover:opacity-75 mt-8"
-            >
-              Continue Shopping
-            </Link>
-          </div>
         )}
       </Wrapper>
     </div>

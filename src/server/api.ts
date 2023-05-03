@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 import { Response } from '@/@types/api';
-import { API_URL, STRAPI_API_TOKEN } from '@/server/utils';
+
+export const STRAPI_API_TOKEN: string = process.env.NEXT_PUBLIC_STRAPI_API_TOKEN!;
+export const API_URL: string = process.env.NEXT_PUBLIC_API_URL!;
 
 const api = axios.create({
   baseURL: API_URL,

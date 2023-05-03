@@ -1,9 +1,9 @@
+import {
+    AddToCartPayload, CounterState, RemoveFromCartPayload, UpdateCartPayload
+} from '@/@types/store';
 import { createSlice } from '@reduxjs/toolkit';
 
-interface CounterState {
-  cartItems: any[];
-}
-
+import type { PayloadAction } from '@reduxjs/toolkit';
 const initialState: CounterState = {
   cartItems: [],
 };
@@ -12,7 +12,7 @@ export const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
-    addToCart: (state, action) => {
+    addToCart: (state, action: PayloadAction<AddToCartPayload>) => {
       const item = state.cartItems.find((x) => x.id === action.payload.id);
 
       if (item) {
@@ -22,18 +22,18 @@ export const cartSlice = createSlice({
         state.cartItems.push({ ...action.payload, quantity: 1 });
       }
     },
-    updateCart: (state, action) => {
+    updateCart: (state, action: PayloadAction<UpdateCartPayload>) => {
       state.cartItems = state.cartItems.map((p) => {
         if (p.id === action.payload.id) {
           if (action.payload.key === 'quantity') {
-            p.attributes.price = p.oneQuantityPrice * action.payload.val;
+            p.attributes.price = p.oneQuantityPrice * Number(action.payload.val);
           }
           return { ...p, [action.payload.key]: action.payload.val };
         }
         return p;
       });
     },
-    removeFromCart: (state, action) => {
+    removeFromCart: (state, action: PayloadAction<RemoveFromCartPayload>) => {
       state.cartItems = state.cartItems.filter((item) => item.id !== action.payload.id);
     },
   },

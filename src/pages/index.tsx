@@ -1,13 +1,13 @@
 import { GetStaticProps } from 'next';
 
-import { ProductPopulateResponse } from '@/@types/ProductPopulate';
-import { HeroBanner } from '@/components/HeroBanner';
-import { ProductCard } from '@/components/ProductCard';
+import { Product } from '@/@types/Product';
+import { HeroBanner } from '@/components/Hero/HeroBanner';
+import { ProductCard } from '@/components/Product/ProductCard';
 import { Wrapper } from '@/components/Wrapper';
 import { fetchDataFromApi } from '@/server/api';
 
 interface HomeProps {
-  products: ProductPopulateResponse[];
+  products: Product[];
 }
 
 export default function Home({ products }: HomeProps) {
