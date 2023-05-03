@@ -3,17 +3,23 @@ import { useEffect, useState } from 'react';
 import { BiMenuAltRight } from 'react-icons/bi';
 import { VscChromeClose } from 'react-icons/vsc';
 
+import { CategoryPopulateResponse } from '@/@types/CategoryPopulate';
 import { Cart } from '@/components/Header/Icons/Cart';
 import { Like } from '@/components/Header/Icons/Like';
 import { Menu } from '@/components/Header/Menu';
 import { MenuMobile } from '@/components/Header/MenuMobile';
 import { Wrapper } from '@/components/Wrapper';
+import { fetchDataFromApi } from '@/server/api';
+import { useAppSelector } from '@/store/hooks';
 
 export function Header() {
   const [mobileMenu, setMobileMenu] = useState<boolean>(false);
   const [showCategoryMenu, setShowCategoryMenu] = useState<boolean>(false);
   const [show, setShow] = useState<string>('translate-y-0');
   const [lastScrollY, setLastScrollY] = useState<number>(0);
+  const [categories, setCategories] = useState<CategoryPopulateResponse[]>([]);
+
+  const { cartItems } = useAppSelector((state) => state.cart);
 
   function controlNavbar() {
     const Y = window.scrollY;
@@ -38,6 +44,16 @@ export function Header() {
     };
   }, [lastScrollY]);
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data } = await fetchDataFromApi('categories?populate=*');
+
+      setCategories(data);
+    };
+
+    fetchCategories();
+  }, []);
+
   return (
     <header
       className={`w-full h-[50px] md:h-[80px] bg-white flex items-center justify-between z-20 sticky top-0 transition-transform duration-300 ${show}`}
@@ -47,19 +63,24 @@ export function Header() {
           <img src="/svg/logo.svg" className="w-[40px] md:w-[60px]" />
         </Link>
 
-        <Menu categoryMenu={showCategoryMenu} setCategoryMenu={setShowCategoryMenu} />
+        <Menu
+          categoryMenu={showCategoryMenu}
+          setCategoryMenu={setShowCategoryMenu}
+          categories={categories}
+        />
 
         {mobileMenu && (
           <MenuMobile
             categoryMenu={showCategoryMenu}
             setCategoryMenu={setShowCategoryMenu}
             setMobile={setMobileMenu}
+            categories={categories}
           />
         )}
 
         <div className="flex items-center fap-2 text-black">
           <Link href={'/cart'}>
-            <Cart size={51} />
+            <Cart size={cartItems.length} />
           </Link>
 
           <Like size={5} />
