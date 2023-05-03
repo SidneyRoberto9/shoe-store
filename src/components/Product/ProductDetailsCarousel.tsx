@@ -2,10 +2,10 @@ import 'react-responsive-carousel/lib/styles/carousel.min.css'; // requires a lo
 
 import { Carousel } from 'react-responsive-carousel';
 
-import { ProductPopulateImageDatum } from '@/@types/ProductPopulate';
+import { ProductImageData } from '@/@types/Product';
 
 interface ProductDetailsCarouselProps {
-  images: ProductPopulateImageDatum[];
+  images: ProductImageData[];
 }
 
 export function ProductDetailsCarousel({ images }: ProductDetailsCarouselProps) {
@@ -18,7 +18,7 @@ export function ProductDetailsCarousel({ images }: ProductDetailsCarouselProps) 
         thumbWidth={60}
         className="productCarousel"
       >
-        {images?.map((image: ProductPopulateImageDatum) => (
+        {images?.map((image: ProductImageData) => (
           <img key={image.id} src={image.attributes.url} />
         ))}
       </Carousel>
