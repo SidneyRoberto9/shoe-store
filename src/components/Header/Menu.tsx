@@ -1,14 +1,16 @@
 import Link from 'next/link';
 import { BsChevronDown } from 'react-icons/bs';
 
-import { routesMenu, subMenuData } from '@/data/MenuRoutes';
+import { CategoryPopulateResponse } from '@/@types/CategoryPopulate';
+import { routesMenu } from '@/data/MenuRoutes';
 
 interface MenuProps {
   categoryMenu: boolean;
   setCategoryMenu: (value: boolean) => void;
+  categories: CategoryPopulateResponse[];
 }
 
-export function Menu({ categoryMenu, setCategoryMenu }: MenuProps) {
+export function Menu({ categoryMenu, setCategoryMenu, categories }: MenuProps) {
   return (
     <ul className="hidden md:flex items-center gap-8 font-medium text-black">
       {routesMenu.map(({ id, name, subMenu, url }) => (
@@ -24,15 +26,15 @@ export function Menu({ categoryMenu, setCategoryMenu }: MenuProps) {
 
               {categoryMenu && (
                 <ul className="bg-white absolute top-6 left-0 min-w-[250px] px-1 text-black shadow-lg">
-                  {subMenuData.map(({ id, name, doc_count }) => (
+                  {categories.map(({ id, attributes: { slug, name, products } }) => (
                     <Link
                       key={id}
-                      href={`/category/${name}`}
+                      href={`/category/${slug}`}
                       onClick={() => setCategoryMenu(false)}
                     >
                       <li className="h-12 flex justify-between items-center px-3 hover:bg-black/[0.03] rounded-md">
                         {name}
-                        <span className="opacity-50 text-sm">{doc_count}</span>
+                        <span className="opacity-50 text-sm">{`(${products.data.length})`}</span>
                       </li>
                     </Link>
                   ))}
