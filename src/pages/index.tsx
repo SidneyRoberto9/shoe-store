@@ -1,8 +1,16 @@
+import { GetStaticProps } from 'next';
+
+import { ProductPopulateResponse } from '@/@types/ProductPopulate';
 import { HeroBanner } from '@/components/HeroBanner';
 import { ProductCard } from '@/components/ProductCard';
 import { Wrapper } from '@/components/Wrapper';
+import { fetchDataFromApi } from '@/server/api';
 
-export default function Home() {
+interface HomeProps {
+  products: ProductPopulateResponse[];
+}
+
+export default function Home({ products }: HomeProps) {
   return (
     <main>
       <HeroBanner />
@@ -18,18 +26,21 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 my-14 px-5 md:px-0">
-          <ProductCard />
-          <ProductCard />
-          <ProductCard />
-          <ProductCard />
-          <ProductCard />
-          <ProductCard />
-          <ProductCard />
-          <ProductCard />
-          <ProductCard />
-          <ProductCard />
+          {products.map((product) => (
+            <ProductCard key={product.id} attributes={product.attributes} />
+          ))}
         </div>
       </Wrapper>
     </main>
   );
 }
+
+export const getStaticProps: GetStaticProps = async (context) => {
+  const { data } = await fetchDataFromApi('products?populate=*');
+
+  return {
+    props: {
+      products: data,
+    },
+  };
+};
