@@ -2,7 +2,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { useState } from 'react';
-import { IoMdHeartEmpty } from 'react-icons/io';
+import { IoMdHeart, IoMdHeartEmpty } from 'react-icons/io';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import { toast, ToastContainer } from 'react-toastify';
 
@@ -11,6 +11,7 @@ import { Product } from '@/@types/Product';
 import { ProductDetailsCarousel } from '@/components/Product/ProductDetailsCarousel';
 import { RelatedProducts } from '@/components/Product/RelatedProducts';
 import { Wrapper } from '@/components/Wrapper';
+import { useWishList } from '@/context/useWishList';
 import { fetchDataFromApi } from '@/server/api';
 import { addToCart } from '@/store/cartSlice';
 import { useAppDispatch } from '@/store/hooks';
@@ -23,6 +24,7 @@ interface ProductDetailsProps {
 
 export default function ProductDetails({ product, products }: ProductDetailsProps) {
   const dispatch = useAppDispatch();
+  const { addToWishList, isProductInWishList, removeFromWishList } = useWishList();
 
   const [selectSize, setSelectSize] = useState<string>('');
   const [showError, setShowError] = useState<boolean>(false);
@@ -31,6 +33,7 @@ export default function ProductDetails({ product, products }: ProductDetailsProp
   const productData = productContent.attributes;
   const productImageData = productData.image.data;
   const productSizeData = productData.size.data;
+  const isProductInWishListState = isProductInWishList(productContent.id);
 
   function notify() {
     toast.success('Success. Check your cart!', {
@@ -148,9 +151,18 @@ export default function ProductDetails({ product, products }: ProductDetailsProp
               Add to Cart
             </button>
 
-            <button className="w-full py-4 rounded-full border border-black text-lg font-medium transition-transform active:scale-95 flex items-center justify-center gap-2 hover:opacity-75 mb-10">
-              Whishlist
-              <IoMdHeartEmpty size={20} />
+            <button
+              className="w-full py-4 rounded-full border border-black text-lg font-medium transition-transform active:scale-95 flex items-center justify-center gap-2 hover:opacity-75 mb-10"
+              onClick={() => {
+                if (isProductInWishListState) {
+                  removeFromWishList(productContent.id);
+                } else {
+                  addToWishList(productContent);
+                }
+              }}
+            >
+              Wishlist
+              {isProductInWishListState ? <IoMdHeart size={20} /> : <IoMdHeartEmpty size={20} />}
             </button>
 
             <div>

@@ -9,6 +9,7 @@ import { Menu } from '@/components/Header/Menu';
 import { MenuMobile } from '@/components/Header/MenuMobile';
 import { Wrapper } from '@/components/Wrapper';
 import { useCategory } from '@/context/useCategory';
+import { useWishList } from '@/context/useWishList';
 import { useAppSelector } from '@/store/hooks';
 
 export function Header() {
@@ -18,6 +19,7 @@ export function Header() {
   const [lastScrollY, setLastScrollY] = useState<number>(0);
 
   const { categories } = useCategory();
+  const { wishSize } = useWishList();
   const { cartItems } = useAppSelector((state) => state.cart);
 
   function controlNavbar() {
@@ -72,8 +74,9 @@ export function Header() {
             <Cart size={cartItems.length} />
           </Link>
 
-          <Like size={5} />
-
+          <Link href={'/wish'}>
+            <Like size={wishSize} />
+          </Link>
           <div className="w-8 md:w-12 h-8 md:h-12 rounded-full flex md:hidden justify-center items-center hover:bg-black/[0.05] cursor-pointer relative -mr-2">
             {mobileMenu ? (
               <VscChromeClose className="text-[16px]" onClick={() => setMobileMenu(false)} />

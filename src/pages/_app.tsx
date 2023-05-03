@@ -11,6 +11,9 @@ import { Loading } from '@/components/Loading';
 import { CategoryProvider } from '@/context/useCategory';
 import { store } from '@/store/store';
 
+import { Providers } from '../components/Providers';
+import { WishProvider } from '../context/useWishList';
+
 import type { AppProps } from 'next/app';
 export default function App({ Component, pageProps }: AppProps) {
   const router: NextRouter = useRouter();
@@ -36,11 +39,11 @@ export default function App({ Component, pageProps }: AppProps) {
       </Head>
       <Loading load={loading} />
       <Provider store={store}>
-        <CategoryProvider>
+        <Providers>
           <Header />
           <Component {...pageProps} />
           <Footer />
-        </CategoryProvider>
+        </Providers>
       </Provider>
     </>
   );
