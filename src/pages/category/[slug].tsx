@@ -1,13 +1,13 @@
-import { GetStaticPaths, GetStaticProps } from 'next';
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
 import useSWR from 'swr';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { GetStaticProps, GetStaticPaths } from 'next';
 
-import { Response } from '@/@types/api';
-import { Category } from '@/@types/Category';
-import { ProductCard } from '@/components/Product/ProductCard';
-import { Wrapper } from '@/components/Wrapper';
 import { fetchDataFromApi } from '@/server/api';
+import { Wrapper } from '@/components/Wrapper';
+import { ProductCard } from '@/components/Product/ProductCard';
+import { Category } from '@/@types/Category';
+import { Response } from '@/@types/api';
 
 interface CategoryProps {
   category: any;
@@ -45,7 +45,7 @@ export default function Category({ products, category, slug }: CategoryProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 my-14 px-5 md:px-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 my-14 px-5 md:px-0 screen-fill">
           {data &&
             data.data.map((product: any) => (
               <ProductCard key={product.id} attributes={product.attributes} />

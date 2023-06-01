@@ -24,6 +24,10 @@
   letter-spacing: 1px;
 }
 
+.screen-fill {
+  @apply min-h-[calc(100vh-312px-80px)];
+}
+
 .productCarousel.carousel-root {
   display: flex;
   flex-direction: row-reverse;
